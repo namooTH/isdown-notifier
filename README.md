@@ -1,2 +1,2 @@
 # isdown-notifier
-A Tool for notifying downtime
+A Tool for notifying downtime written in rust.
