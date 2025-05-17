@@ -1,20 +1,12 @@
-use toml::Table;
 use tokio::time::{sleep, Duration};
-use std::{fs::File, io::{BufReader, Read}};
 
 mod host;
 mod config;
 
 #[tokio::main]
 async fn main() {
-    let config_file = File::open("config.toml").unwrap_or_else(|error| panic!("Configuration File Is Not Presented.\n({:?})", error));
-    let mut config_buffer = BufReader::new(config_file);
-    let mut config_str = String::new();
-    ..config_buffer.read_to_string(&mut config_str);
-    
-    let map_config = config_str.parse::<Table>().unwrap_or_else(|error| panic!("Error While Parsing The Config File.\n({:?})", error));
     let mut config = config::Config::default();
-    config.load_config(map_config);
+    config.load_config_from_file("config.toml");
 
     let hosts = config.hosts.as_slice();
     let discord_webhook = config.discord_webhook;

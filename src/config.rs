@@ -1,7 +1,7 @@
-use std::ops::Index;
+use std::{fs::File, io::{BufReader, Read}, ops::Index};
 
 use dns_lookup::lookup_host;
-use toml::{map::Map, Value};
+use toml::{map::Map, Table, Value};
 use webhook::client::WebhookClient;
 
 use crate::host::Host;
@@ -14,7 +14,17 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load_config(&mut self, map_config: Map<String, Value>) {
+    pub fn load_config_from_file(&mut self, path: &str) {
+        let config_file = File::open(path).unwrap_or_else(|error| panic!("Configuration Is Not A Vaild Path.\n({:?})", error));
+        let mut config_buffer = BufReader::new(config_file);
+        let mut config_str = String::new();
+        ..config_buffer.read_to_string(&mut config_str);
+        
+        self.load_config_from_map(config_str.parse::<Table>()
+                                 .unwrap_or_else(|error| panic!("Error While Parsing The Config File.\n({:?})", error)));
+    }
+
+    pub fn load_config_from_map(&mut self, map_config: Map<String, Value>) {
         for key in map_config.keys() {
             match key.as_str() {
                 "hosts" => {
