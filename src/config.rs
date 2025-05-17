@@ -37,11 +37,11 @@ impl Config {
                                 let ips = lookup_host(host.as_str().unwrap()).unwrap();
                                 for ip in ips.as_slice() {
                                     if ip.is_ipv4() {
-                                        self.hosts.push(Host{name: host.as_str().unwrap().to_string(), ip: *ip});
+                                        self.hosts.push(Host{name: host.as_str().unwrap().to_string(), ip: *ip, timeout_count: Default::default()});
                                         continue 'host_loop;
                                     }
                                 }
-                                self.hosts.push(Host{name: host.as_str().unwrap().to_string(), ip: *ips.index(0)});
+                                self.hosts.push(Host{name: host.as_str().unwrap().to_string(), ip: *ips.index(0), timeout_count: Default::default()});
                             }
                         
                         }
