@@ -1,6 +1,7 @@
 use formatify::{Formatify, PlaceholderFormatter};
 use std::{collections::HashMap, time::{SystemTime, UNIX_EPOCH}};
 use webhook::client::WebhookClient;
+use gethostname::gethostname;
 
 use crate::ping::Ping;
 
@@ -25,6 +26,7 @@ impl DiscordWebhook {
         let mut string_map: HashMap<&str, String> = HashMap::new();
         string_map.insert("unix_timestamp", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs().to_string());
         string_map.insert("name", ping.host.name.clone());
+        string_map.insert("hostname", gethostname().into_string().unwrap());
         string_map.insert("ip", ping.host.ip.to_string());
         if ping.timeout_count > retry { string_map.insert("status", "Online".to_string()); }
         else { string_map.insert("status", "Offline".to_string()); }
