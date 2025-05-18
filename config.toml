@@ -1,9 +1,11 @@
 timeout = 5
-hosts = [
-    "google.com"
-]
+retry = 5
+
+# "name" = "ip"
+[hosts]
+"Google" = "google.com"
 
 [discord]
 webhook = ""
-# content = ""
-# embed_content = ""
+content = "At <t:%(unix_timestamp)>"
+embed_content = "%(name) (%(ip)) is %(status)"

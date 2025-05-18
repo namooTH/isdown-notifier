@@ -4,12 +4,12 @@ use dns_lookup::lookup_host;
 use toml::{map::Map, Table, Value};
 use webhook::client::WebhookClient;
 
-use crate::host::Host;
-use crate::discord_webhook::DiscordWebhook;
+use crate::{host::Host, discord_webhook::DiscordWebhook};
 
 #[derive(Default)]
 pub struct Config {
-    pub timeout: f64,
+    pub timeout: f64 = 5.0,
+    pub retry: u8 = 5,
     pub hosts: Vec<Host>,
     pub discord_webhook: Option<DiscordWebhook>
 }
@@ -29,22 +29,17 @@ impl Config {
         for key in map_config.keys() {
             match key.as_str() {
                 "hosts" => {
-                    let hosts = map_config.get(key).unwrap();
-                    if hosts.is_array() {
-    
-                        let hosts_iter = hosts.as_array().unwrap();
-                        'host_loop: for host in hosts_iter {
-                            if host.is_str() {
-                                let ips = lookup_host(host.as_str().unwrap()).unwrap();
-                                for ip in ips.as_slice() {
-                                    if ip.is_ipv4() {
-                                        self.hosts.push(Host{name: host.as_str().unwrap().to_string(), ip: *ip, timeout_count: Default::default()});
-                                        continue 'host_loop;
-                                    }
+                    let hosts = map_config.get(key).unwrap().as_table().unwrap();
+                    'host_loop: for host in hosts {
+                        if host.1.is_str() {
+                            let ips = lookup_host(host.1.as_str().unwrap()).unwrap();
+                            for ip in ips.as_slice() {
+                                if ip.is_ipv4() {
+                                    self.hosts.push(Host{name: host.0.clone(), ip: *ip});
+                                    continue 'host_loop;
                                 }
-                                self.hosts.push(Host{name: host.as_str().unwrap().to_string(), ip: *ips.index(0), timeout_count: Default::default()});
                             }
-                        
+                            self.hosts.push(Host{name: host.0.clone(), ip: *ips.index(0)});
                         }
                     }
                 },
@@ -56,7 +51,14 @@ impl Config {
                     } else if timeout.is_float() {
                         self.timeout = timeout.as_float().unwrap();
                     }
-                        
+                },
+
+                "retry" => {
+                    let retry = map_config.get(key).unwrap();
+                    if retry.is_integer() {
+                        self.retry = retry.as_integer().unwrap() as u8;
+                    }
+                    else { println!("Warning: Property '{:}' Contains Invaild Datatype. (Expected: Integer)", key.as_str()); }
                 },
 
                 "discord" => {
