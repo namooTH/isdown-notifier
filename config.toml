@@ -1,3 +1,4 @@
+delay = 20
 timeout = 5
 retry = 5
 
@@ -6,6 +7,6 @@ retry = 5
 "Google" = "google.com"
 
 [discord]
-webhook = ""
+webhook = "" # discord webhook url
 content = "At <t:%(unix_timestamp)>"
 embed_content = "%(name) (%(ip)) is %(status)"

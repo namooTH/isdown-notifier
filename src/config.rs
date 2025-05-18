@@ -8,6 +8,7 @@ use crate::{host::Host, discord_webhook::DiscordWebhook};
 
 #[derive(Default)]
 pub struct Config {
+    pub delay: f64 = 5.0,
     pub timeout: f64 = 5.0,
     pub retry: u8 = 5,
     pub hosts: Vec<Host>,
@@ -41,6 +42,15 @@ impl Config {
                             }
                             self.hosts.push(Host{name: host.0.clone(), ip: *ips.index(0)});
                         }
+                    }
+                },
+
+                "delay" => {
+                    let delay = map_config.get(key).unwrap();
+                    if delay.is_integer() {
+                        self.timeout = delay.as_integer().unwrap() as f64;
+                    } else if delay.is_float() {
+                        self.timeout = delay.as_float().unwrap();
                     }
                 },
 
