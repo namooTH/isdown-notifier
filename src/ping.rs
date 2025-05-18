@@ -31,15 +31,13 @@ impl Ping {
             Ping{ host: Host { name: "Cloudflare DNS".to_string(), ip: IpAddr::from_str("1.1.1.1").unwrap() }, timeout: Duration::from_secs_f64(config.timeout), timeout_count: Default::default() },
             Ping{ host: Host { name: "Cloudflare DNS Backup".to_string(), ip: IpAddr::from_str("1.0.0.1").unwrap() }, timeout: Duration::from_secs_f64(config.timeout), timeout_count: Default::default() }
         ];
-        let mut is_successful = false; 
-    
+
         for ping in pings.iter_mut() {
             let ping_result = ping.ping().await;
-            if ping_result.is_ok() { is_successful = true }
+            if ping_result.is_ok() { return Ok(()) }
         }
     
-        if is_successful { Ok(()) }
-        else { return Err(()) }
+        return Err(())
     }
 
     pub fn increment_timeout_count(&mut self, amount: u8) {

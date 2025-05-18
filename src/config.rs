@@ -48,9 +48,9 @@ impl Config {
                 "delay" => {
                     let delay = map_config.get(key).unwrap();
                     if delay.is_integer() {
-                        self.timeout = delay.as_integer().unwrap() as f64;
+                        self.delay = delay.as_integer().unwrap() as f64;
                     } else if delay.is_float() {
-                        self.timeout = delay.as_float().unwrap();
+                        self.delay = delay.as_float().unwrap();
                     }
                 },
 
