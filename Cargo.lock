@@ -146,6 +146,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
+name = "formatify"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34405505c2522dd86d88d5397b8472c1ec502003da8f60bdeb06866a3bd6c240"
+
+[[package]]
 name = "futures-channel"
 version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -325,6 +331,7 @@ name = "isdown-notifier"
 version = "0.1.0"
 dependencies = [
  "dns-lookup",
+ "formatify",
  "surge-ping",
  "tokio",
  "toml",

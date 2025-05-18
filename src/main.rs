@@ -3,14 +3,13 @@ use tokio::time::{sleep, Duration};
 
 mod host;
 mod config;
+mod discord_webhook;
 
 #[tokio::main]
 async fn main() {
     let mut config = config::Config::default();
     config.load_config_from_file("config.toml");
-
     let hosts = config.hosts.as_mut_slice();
-    let discord_webhook = config.discord_webhook;
 
     loop {
 
@@ -27,15 +26,13 @@ async fn main() {
                     match err {
                         
                         surge_ping::SurgeError::Timeout { seq } => {
-                            host.increment_timeout_count(1);
-
+                            if host.timeout_count < 6 {
+                                host.increment_timeout_count(1);
+                            }
                             if host.timeout_count == 5 {
-                                let dc_wh = discord_webhook.as_ref();
-                                if dc_wh.is_some() {
-                                    ..dc_wh.unwrap().send(|message| message
-                                        .username("IsDown Notifier Bot")
-                                        .embed(|embed| embed
-                                        .description(format!("## Error\n{:?}", seq).as_str()))).await;
+                                let discord_webhook = config.discord_webhook.as_mut();
+                                if discord_webhook.is_some() {
+                                    ..discord_webhook.unwrap().send().await;
                                 }
                             }
    

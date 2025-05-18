@@ -5,12 +5,13 @@ use toml::{map::Map, Table, Value};
 use webhook::client::WebhookClient;
 
 use crate::host::Host;
+use crate::discord_webhook::DiscordWebhook;
 
 #[derive(Default)]
 pub struct Config {
     pub timeout: f64,
     pub hosts: Vec<Host>,
-    pub discord_webhook: Option<WebhookClient>
+    pub discord_webhook: Option<DiscordWebhook>
 }
 
 impl Config {
@@ -47,6 +48,7 @@ impl Config {
                         }
                     }
                 },
+
                 "timeout" => {
                     let timeout = map_config.get(key).unwrap();
                     if timeout.is_integer() {
@@ -56,12 +58,42 @@ impl Config {
                     }
                         
                 },
-                "discord_webhook" => {
-                    let discord_webhook = map_config.get(key).unwrap();
-                    if discord_webhook.is_str() {
-                        self.discord_webhook = Some(WebhookClient::new(discord_webhook.as_str().unwrap()));
+
+                "discord" => {
+                    self.discord_webhook = Some(DiscordWebhook{
+                        client: Default::default(),
+                        content: "At <t:%(unix_timestamp)>".to_string(),
+                        embed_content: "## Error\n%(error_message)".to_string()});
+                        
+                    let discord = map_config.get(key).unwrap().as_table().unwrap();
+                    for value in discord {
+                        match value.0.as_str() {
+                            "webhook" => {
+                                if value.1.is_str() {
+                                    let webhook = self.discord_webhook.as_mut();
+                                    webhook.unwrap().client = Some(WebhookClient::new(value.1.as_str().unwrap()))
+                                }
+                                else { println!("Warning: Property '{:}' in '{:}' Contains Invaild Datatype. (Expected: String)", value.0, key.as_str()); }
+                            }
+                            "content" => {
+                                if value.1.is_str() {
+                                    let webhook = self.discord_webhook.as_mut();
+                                    webhook.unwrap().content = value.1.as_str().unwrap().to_string()
+                                }
+                                else { println!("Warning: Property '{:}' in '{:}' Contains Invaild Datatype. (Expected: String)", value.0, key.as_str()); }
+                            }
+                            "embed_content" => {
+                                if value.1.is_str() {
+                                    let webhook = self.discord_webhook.as_mut();
+                                    webhook.unwrap().embed_content = value.1.as_str().unwrap().to_string()                              
+                                }
+                                else { println!("Warning: Property '{:}' in '{:}' Contains Invaild Datatype. (Expected: String)", value.0, key.as_str()); }
+                            }
+                            _ => ()
+                        }
                     }
                 },
+
                 _ => {
                     println!("Warning: Property '{key}' Is Not A Vaild Property.");
                 }

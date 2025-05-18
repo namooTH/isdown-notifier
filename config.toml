@@ -2,4 +2,8 @@ timeout = 5
 hosts = [
     "google.com"
 ]
-discord_webhook = ""
+
+[discord]
+webhook = ""
+# content = ""
+# embed_content = ""
