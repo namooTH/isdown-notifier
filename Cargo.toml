@@ -8,6 +8,6 @@ dns-lookup = "2.0.4"
 formatify = "0.2.0"
 gethostname = "1.0.2"
 surge-ping = "0.8.2"
-tokio = { version = "1.45.0", features = ["full"] }
-toml = "0.8.22"
+tokio = { version = "1.45.1", features = ["full"] }
+toml = "0.8.23"
 webhook = "2.1.2"
