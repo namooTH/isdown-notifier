@@ -14,7 +14,7 @@ async fn main() {
     config.load_config_from_file("config.toml");
     
     let mut pings: Vec<ping::Ping> = vec![];
-    for host in config.hosts.iter() { pings.push(ping::Ping{ host: host.clone(), timeout: Duration::from_secs_f64(config.timeout), timeout_count: Default::default() }); }
+    for host in config.hosts.iter() { pings.push(ping::Ping{ host: host.clone(), timeout: Duration::from_secs_f64(config.timeout), timeout_count: 0, online: true }); }
     
     let mut is_network_available = true;
 
@@ -32,7 +32,8 @@ async fn main() {
                         let timeout_count: u8 = ping.timeout_count.clone();
                         ping.reset_timeout_count();
 
-                        if timeout_count >= config.retry {
+                        if timeout_count >= config.retry && !ping.online {
+                            ping.update_status(&config);
                             send_webhooks(&config, &ping).await;
                         }
                     },
@@ -42,7 +43,8 @@ async fn main() {
                                 if ping.timeout_count < config.retry+1 {
                                     ping.increment_timeout_count(1);
                                 }
-                                if ping.timeout_count == config.retry {
+                                if ping.timeout_count == config.retry && ping.online {
+                                    ping.update_status(&config);
                                     send_webhooks(&config, &ping).await;
                                 }
                             }
@@ -62,7 +64,7 @@ async fn main() {
 
         } else if is_network_available {
             println!("Network Unreachable.");
-            for ping in pings.iter_mut() { ping.reset_timeout_count() }
+            for ping in pings.iter_mut() { ping.reset_timeout_count(); }
             is_network_available = false;
         }
     }
@@ -70,9 +72,8 @@ async fn main() {
 }
 
 async fn send_webhooks(config: &config::Config, ping: &Ping) {
-    let discord_webhook = &config.discord_webhook;
-    match discord_webhook {
-        Some(dc_wh) => { ..dc_wh.send(&config, &ping).await; }
+    match &config.discord_webhook {
+        Some(dc_wh) => { ..dc_wh.send(&ping).await; }
         None => ()
     }
 }
