@@ -29,13 +29,12 @@ async fn main() {
     
                 match ping_result {
                     Ok(_reply) => {
-                        if ping.timeout_count >= config.retry {
-                            let discord_webhook = config.discord_webhook.as_mut();
-                            if discord_webhook.is_some() {
-                                ..discord_webhook.unwrap().send(config.retry, &ping).await;
-                            }
-                        }
+                        let timeout_count: u8 = ping.timeout_count.clone();
                         ping.reset_timeout_count();
+
+                        if timeout_count >= config.retry {
+                            send_webhooks(&config, &ping).await;
+                        }
                     },
                     Err(err) => {
                         match err {
@@ -44,10 +43,7 @@ async fn main() {
                                     ping.increment_timeout_count(1);
                                 }
                                 if ping.timeout_count == config.retry {
-                                    let discord_webhook = config.discord_webhook.as_mut();
-                                    if discord_webhook.is_some() {
-                                        ..discord_webhook.unwrap().send(config.retry, &ping).await;
-                                    }
+                                    send_webhooks(&config, &ping).await;
                                 }
                             }
     
@@ -71,4 +67,12 @@ async fn main() {
         }
     }
 
+}
+
+async fn send_webhooks(config: &config::Config, ping: &Ping) {
+    let discord_webhook = &config.discord_webhook;
+    match discord_webhook {
+        Some(dc_wh) => { ..dc_wh.send(&config, &ping).await; }
+        None => ()
+    }
 }
