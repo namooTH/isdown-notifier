@@ -16,12 +16,12 @@ pub fn list(pid: Option<bool>) -> Vec<String> {
 
     if !pid.is_some_and(|show_pid| show_pid) {
         screens = stripped_output.into_iter().enumerate()
-        .filter(|(index, _)| index % 2 == 0)
+        .filter(|(_, name)| name.contains("."))
         .map(|(_, name)| name[name.find(".").unwrap()+1..].to_string())
         .collect();
     } else {
         screens = stripped_output.into_iter().enumerate()
-        .filter(|(index, _)| index % 2 == 0)
+        .filter(|(_, name)| name.contains("."))
         .map(|(_, name)| name.to_string())
         .collect();
     }
