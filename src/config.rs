@@ -1,4 +1,4 @@
-use std::{fs::File, io::{BufReader, Read}, ops::Index};
+use std::{collections::HashMap, fs::File, io::{BufReader, Read}, ops::Index};
 
 use dns_lookup::lookup_host;
 use toml::{map::Map, Table, Value};
@@ -12,7 +12,8 @@ pub struct Config {
     pub timeout: f64 = 5.0,
     pub retry: u8 = 5,
     pub hosts: Vec<Host>,
-    pub discord_webhook: Option<DiscordWebhook>
+    pub discord_webhook: Option<DiscordWebhook>,
+    pub execute_on_offline: HashMap<String, Vec<String>>
 }
 
 impl Config {
@@ -103,6 +104,21 @@ impl Config {
                             }
                             _ => ()
                         }
+                    }
+                },
+
+                "execute_on_offline" => {
+                    let hosts = map_config.get(key).unwrap().as_table().unwrap();
+                    for host in hosts {
+                        let mut commands: Vec<String> = vec![]; 
+                        if host.1.is_array() {
+                            for command in host.1.as_array().unwrap() {
+                                if command.is_str() {
+                                    commands.push(command.as_str().unwrap().to_string());
+                                }
+                            }
+                        }
+                        self.execute_on_offline.insert(host.0.to_string(), commands);
                     }
                 },
 

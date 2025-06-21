@@ -1,20 +1,23 @@
 #![feature(default_field_values)]
 #![feature(random)]
+
 use ping::Ping;
 use tokio::time::{sleep, Duration};
 
 mod host;
 mod config;
 mod discord_webhook;
+mod webhooks;
 mod ping;
+mod screen;
 
 #[tokio::main]
 async fn main() {
     let mut config = config::Config::default();
     config.load_config_from_file("config.toml");
-    
+
     let mut pings: Vec<ping::Ping> = vec![];
-    for host in config.hosts.iter() { pings.push(ping::Ping{ host: host.clone(), timeout: Duration::from_secs_f64(config.timeout), timeout_count: 0, online: true }); }
+    for host in config.hosts.iter() { pings.push(ping::Ping{ host: host.clone(), timeout: Duration::from_secs_f64(config.timeout), timeout_count: 0, online: true, screen: None }); }
     
     let mut is_network_available = true;
 
@@ -33,8 +36,7 @@ async fn main() {
                         ping.reset_timeout_count();
 
                         if timeout_count >= config.retry && !ping.online {
-                            ping.update_status(&config);
-                            send_webhooks(&config, &ping).await;
+                            ping.update_status(&config).await;
                         }
                     },
                     Err(err) => {
@@ -44,8 +46,7 @@ async fn main() {
                                     ping.increment_timeout_count(1);
                                 }
                                 if ping.timeout_count == config.retry && ping.online {
-                                    ping.update_status(&config);
-                                    send_webhooks(&config, &ping).await;
+                                    ping.update_status(&config).await;
                                 }
                             }
     
@@ -56,7 +57,6 @@ async fn main() {
                             _ => println!("{:?}", err)
     
                         }
-    
                     }
                 }
                 
@@ -69,11 +69,4 @@ async fn main() {
         }
     }
 
-}
-
-async fn send_webhooks(config: &config::Config, ping: &Ping) {
-    match &config.discord_webhook {
-        Some(dc_wh) => { ..dc_wh.send(&ping).await; }
-        None => ()
-    }
 }
