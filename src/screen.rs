@@ -12,19 +12,19 @@ pub fn list(pid: Option<bool>) -> Vec<String> {
     }
 
     let stripped_output: Vec<&str> = output_raw[trimmed.find("\n").unwrap()..trimmed.rfind("\n").unwrap()].trim().split("\t").collect();
+    let screens_filtered = stripped_output.into_iter().enumerate().filter(|(_, name)| name.contains("."));
     let mut screens: Vec<String>;
 
     if !pid.is_some_and(|show_pid| show_pid) {
-        screens = stripped_output.into_iter().enumerate()
-        .filter(|(_, name)| name.contains("."))
+        screens = screens_filtered
         .map(|(_, name)| name[name.find(".").unwrap()+1..].to_string())
         .collect();
     } else {
-        screens = stripped_output.into_iter().enumerate()
-        .filter(|(_, name)| name.contains("."))
+        screens = screens_filtered
         .map(|(_, name)| name.to_string())
         .collect();
     }
+
     // reverse because the screen command sorts from newest to oldest
     screens.reverse();
 
