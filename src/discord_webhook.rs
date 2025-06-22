@@ -33,7 +33,7 @@ impl DiscordWebhook {
         let commands = config.execute_on_offline.get(&ping.host.name);
         if commands.is_some() { string_map.insert("commands", commands.unwrap().join("\n")); }
         else { string_map.insert("commands", "NONE".to_string()); }
-        let screens = screen::list(Some(false));
+        let screens: Vec<String> = screen::list().iter().map(|screen| screen.get_full_name()).collect();
         if screens.len() > 0{ string_map.insert("screens", screens.join("\n")); }
         else { string_map.insert("screens", "NONE".to_string()); }
         

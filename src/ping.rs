@@ -1,14 +1,14 @@
 use std::{net::IpAddr, random::random, str::FromStr, time::Duration};
 use surge_ping::{Client, Config, IcmpPacket, PingIdentifier, PingSequence, SurgeError, ICMP};
 
-use crate::{config, host::Host, screen, webhooks};
+use crate::{config, host::Host, screen::{self, Screen}, webhooks};
 
 pub struct Ping {
     pub host: Host,
     pub timeout: Duration,
     pub timeout_count: u8,
     pub online: bool,
-    pub screen: Option<String>
+    pub screen: Option<Screen>
 }
 
 impl Ping {
@@ -47,13 +47,13 @@ impl Ping {
         if self.timeout_count < config.retry {
             self.online = true;
             if self.screen.is_some() {
-                screen::kill(self.screen.as_ref().unwrap());
+                screen::kill(&self.screen.as_ref().unwrap().get_full_name());
                 self.screen = None;
             }
         }
         else {
             self.online = false;
-            if commands.is_some() { self.screen = Some(screen::create(&self.host.name, commands.unwrap())); }
+            if commands.is_some() { self.screen = screen::create(&self.host.name, commands.unwrap()); }
         }
 
         webhooks::send_webhooks(config, &self).await;

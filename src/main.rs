@@ -1,5 +1,6 @@
 #![feature(default_field_values)]
 #![feature(random)]
+#![feature(int_from_ascii)]
 
 use ping::Ping;
 use tokio::time::{sleep, Duration};
