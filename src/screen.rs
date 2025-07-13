@@ -29,7 +29,7 @@ pub fn list() -> Vec<Screen> {
     let stripped_output: Vec<&str> = output_raw[trimmed.find("\n").unwrap()..trimmed.rfind("\n").unwrap()].trim().split("\t").collect();
     
     let screens_filtered = stripped_output.into_iter().enumerate()
-     .filter(|(_, name)| name.contains("."));
+    .filter(|(_, name)| name.contains("."));
 
     screens = screens_filtered
     .map(|(_, name)| Screen { pid: u32::from_ascii(name[..name.find(".").unwrap()].as_bytes()).unwrap(), name: name[name.find(".").unwrap()+1..].to_string()} )

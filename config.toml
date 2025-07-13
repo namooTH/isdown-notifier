@@ -10,3 +10,9 @@ retry = 5
 webhook = "" # discord webhook url
 content = "At <t:%(unix_timestamp)>"
 embed_content = "%(name) (%(ip)) is %(status)"
+
+# opens a webpage when google is offline
+[execute_on_offline]
+"Google" = [
+    "npx live-server"
+]

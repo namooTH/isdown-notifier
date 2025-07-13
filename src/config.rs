@@ -22,9 +22,9 @@ impl Config {
         let mut config_buffer = BufReader::new(config_file);
         let mut config_str = String::new();
         ..config_buffer.read_to_string(&mut config_str);
-        
+
         self.load_config_from_map(config_str.parse::<Table>()
-                                 .unwrap_or_else(|error| panic!("Error While Parsing The Config File.\n({:?})", error)));
+                                .unwrap_or_else(|error| panic!("Error While Parsing The Config File.\n({:?})", error)));
     }
 
     pub fn load_config_from_map(&mut self, map_config: Map<String, Value>) {
@@ -77,7 +77,7 @@ impl Config {
                         client: Default::default(),
                         content: "At <t:%(unix_timestamp)>".to_string(),
                         embed_content: "## Error\n%(error_message)".to_string()});
-                        
+
                     let discord = map_config.get(key).unwrap().as_table().unwrap();
                     for value in discord {
                         match value.0.as_str() {
@@ -98,7 +98,7 @@ impl Config {
                             "embed_content" => {
                                 if value.1.is_str() {
                                     let webhook = self.discord_webhook.as_mut();
-                                    webhook.unwrap().embed_content = value.1.as_str().unwrap().to_string()                              
+                                    webhook.unwrap().embed_content = value.1.as_str().unwrap().to_string()
                                 }
                                 else { println!("Warning: Property '{:}' in '{:}' Contains Invaild Datatype. (Expected: String)", value.0, key.as_str()); }
                             }
@@ -110,7 +110,7 @@ impl Config {
                 "execute_on_offline" => {
                     let hosts = map_config.get(key).unwrap().as_table().unwrap();
                     for host in hosts {
-                        let mut commands: Vec<String> = vec![]; 
+                        let mut commands: Vec<String> = vec![];
                         if host.1.is_array() {
                             for command in host.1.as_array().unwrap() {
                                 if command.is_str() {

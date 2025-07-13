@@ -19,7 +19,7 @@ async fn main() {
 
     let mut pings: Vec<ping::Ping> = vec![];
     for host in config.hosts.iter() { pings.push(ping::Ping{ host: host.clone(), timeout: Duration::from_secs_f64(config.timeout), timeout_count: 0, online: true, screen: None }); }
-    
+
     let mut is_network_available = true;
 
     loop {
@@ -30,7 +30,7 @@ async fn main() {
 
             for ping in pings.iter_mut() {
                 let ping_result = ping.ping().await;
-    
+
                 match ping_result {
                     Ok(_reply) => {
                         let timeout_count: u8 = ping.timeout_count.clone();
@@ -50,17 +50,17 @@ async fn main() {
                                     ping.update_status(&config).await;
                                 }
                             }
-    
+
                             surge_ping::SurgeError::IOError(ref e) if e.kind() == std::io::ErrorKind::NetworkUnreachable => {
                                 ping.reset_timeout_count();
                             }
 
                             _ => println!("{:?}", err)
-    
+
                         }
                     }
                 }
-                
+
             }
 
         } else if is_network_available {
